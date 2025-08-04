@@ -1,8 +1,10 @@
-spring.datasource.url=${DB_URL}
-spring.datasource.username=${DB_USERNAME}
-spring.datasource.password=${DB_PASSWORD}
+# Database connection
+spring.datasource.url=jdbc:mysql://assetsure.cloeg0qes9mp.ap-south-1.rds.amazonaws.com:3306/collateral_management?useSSL=false&allowPublicKeyRetrieval=true
+spring.datasource.username=admin
+spring.datasource.password=Magnum-2001
 spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 
+# JPA settings
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=true
 spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
