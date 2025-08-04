@@ -3,6 +3,8 @@ package com.example.assetSure.sql;
 public class TabelsQuery {
 
     /*
+
+    database password - Magnum-2001
      Create database collateral_management;
 
 use collateral_management;
