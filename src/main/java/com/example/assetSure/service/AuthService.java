@@ -10,10 +10,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Optional;
 
 @Service
 public class AuthService {
+
+    private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
 
     @Autowired
     private UserRepository userRepository;
@@ -25,35 +30,45 @@ public class AuthService {
     private JwtUtil jwtUtil;
 
     public LoginResponse login(LoginRequest request) throws Exception {
+        logger.info("Attempting login for username: {}", request.getUsername());
+
         Optional<User> userOpt = userRepository.findByUsername(request.getUsername());
+
         if (userOpt.isEmpty()) {
+            logger.warn("Login failed: User not found for username {}", request.getUsername());
             throw new Exception("Invalid username or password");
         }
 
         User user = userOpt.get();
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            logger.warn("Login failed: Password mismatch for username {}", request.getUsername());
             throw new Exception("Invalid username or password");
         }
 
         String token = jwtUtil.generateToken(user.getUsername());
+        logger.info("Login successful for username: {} - JWT generated", request.getUsername());
 
         return new LoginResponse(token);
     }
 
     public void register(RegisterRequest request) throws Exception {
+        logger.info("Registration attempt for username: {}", request.getUsername());
+
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
+            logger.warn("Registration failed: Username already exists - {}", request.getUsername());
             throw new Exception("Username already exists");
         }
+
         User user = new User();
         user.setUsername(request.getUsername());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setName(request.getName());
         user.setPhone(request.getPhone());
         user.setAddress(request.getAddress());
-        // If role is provided; else default to "USER"
         user.setRole(request.getRole() != null ? request.getRole() : "USER");
-        userRepository.save(user);
-    }
 
+        userRepository.save(user);
+        logger.info("User registered successfully with username: {}", request.getUsername());
+    }
 }
