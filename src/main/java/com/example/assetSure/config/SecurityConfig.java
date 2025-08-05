@@ -48,17 +48,13 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // Enable CORS with the above configuration
                 .cors(Customizer.withDefaults())
-                // Disable CSRF for stateless REST API (enable if you use cookies)
                 .csrf(csrf -> csrf.disable())
-                // Configure endpoint authorization
                 .authorizeHttpRequests(auth -> auth
-                        // Allow unauthenticated access to /api/login
-                        .requestMatchers("/api/login","/api/register").permitAll()
-                        // All other requests require authentication
+                        .requestMatchers("/", "/favicon.ico", "/api/login", "/api/register").permitAll()
                         .anyRequest().authenticated()
                 );
         return http.build();
     }
+
 }
