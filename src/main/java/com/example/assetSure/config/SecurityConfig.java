@@ -23,25 +23,25 @@ public class SecurityConfig {
     }
 
     @Bean
-    CorsConfigurationSource corsConfigurationSource() {
+    public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Allow React frontend origin
-        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+        // ✅ Allow your deployed S3 frontend origin
+        configuration.setAllowedOrigins(List.of("http://assetsure-frontend-prod.s3-website.ap-south-1.amazonaws.com"));
 
-        // Allow HTTP methods your frontend might use
+        // ✅ Allow all standard HTTP methods
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 
-        // Allow all headers (you can restrict this if needed)
+        // ✅ Allow all headers
         configuration.setAllowedHeaders(List.of("*"));
 
-        // Allow credentials (cookies, authorization headers)
+        // ✅ Allow credentials (cookies, Authorization headers)
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 
-        // Apply this CORS config to all /api/** endpoints
-        source.registerCorsConfiguration("/api/**", configuration);
+        // ✅ Apply CORS for all endpoints
+        source.registerCorsConfiguration("/**", configuration);
         return source;
     }
 
@@ -55,6 +55,4 @@ public class SecurityConfig {
                 );
         return http.build();
     }
-
-
 }
