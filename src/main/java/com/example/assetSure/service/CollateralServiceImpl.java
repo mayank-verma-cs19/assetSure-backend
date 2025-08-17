@@ -5,6 +5,8 @@ import com.example.assetSure.repository.CollateralMasterRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class CollateralServiceImpl implements CollateralService {
 
@@ -19,5 +21,10 @@ public class CollateralServiceImpl implements CollateralService {
     @Transactional
     public CollateralMaster saveCollateral(CollateralMaster collateralMaster) {
         return collateralMasterRepository.save(collateralMaster);
+    }
+
+    @Override
+    public List<CollateralMaster> getAllCollateralItems() {
+        return collateralMasterRepository.findAll();
     }
 }

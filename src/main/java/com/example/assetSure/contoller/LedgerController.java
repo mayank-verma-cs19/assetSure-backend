@@ -11,10 +11,9 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api")
@@ -49,13 +48,11 @@ public class LedgerController {
             @RequestBody CollateralMaster collateralMaster,
             HttpSession session
     ) {
-        // Retrieve user info from session
         UserInfo userInfo = (UserInfo) session.getAttribute("USER_INFO");
         if (userInfo == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        // Use userInfo fields as needed
         collateralMaster.setCreatedBy(userInfo.getName());
         // collateralMaster.setUserType(userInfo.getRole()); // Uncomment if needed
 
@@ -63,5 +60,15 @@ public class LedgerController {
         return ResponseEntity.ok(savedItem);
     }
 
-    // Other controller methods...
+    @GetMapping("/getCollateralItems")
+    public ResponseEntity<List<CollateralMaster>> getCollateralItems(HttpSession session) {
+        UserInfo userInfo = (UserInfo) session.getAttribute("USER_INFO");
+        if (userInfo == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        List<CollateralMaster> items = collateralService.getAllCollateralItems();
+        return ResponseEntity.ok(items);
+    }
+
+
 }
