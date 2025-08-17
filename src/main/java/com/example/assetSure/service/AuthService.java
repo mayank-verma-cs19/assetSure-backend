@@ -32,14 +32,14 @@ public class AuthService {
     public LoginResponse login(LoginRequest request) throws Exception {
         logger.info("Attempting login for username: {}", request.getUsername());
 
-        Optional<User> userOpt = userRepository.findByUsername(request.getUsername());
+        User userOpt = userRepository.findByUsername(request.getUsername());
 
-        if (userOpt.isEmpty()) {
+        if (userOpt ==  null) {
             logger.warn("Login failed: User not found for username {}", request.getUsername());
             throw new Exception("Invalid username or password");
         }
 
-        User user = userOpt.get();
+        User user = userOpt;
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             logger.warn("Login failed: Password mismatch for username {}", request.getUsername());
@@ -49,13 +49,13 @@ public class AuthService {
         String token = jwtUtil.generateToken(user.getUsername());
         logger.info("Login successful for username: {} - JWT generated", request.getUsername());
 
-        return new LoginResponse(token);
+        return new LoginResponse(token , user);
     }
 
     public void register(RegisterRequest request) throws Exception {
         logger.info("Registration attempt for username: {}", request.getUsername());
 
-        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
+        if (userRepository.findByUsername(request.getUsername()) != null) {
             logger.warn("Registration failed: Username already exists - {}", request.getUsername());
             throw new Exception("Username already exists");
         }

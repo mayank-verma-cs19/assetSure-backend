@@ -3,8 +3,13 @@ package com.example.assetSure.contoller;
 import com.example.assetSure.dto.LoginRequest;
 import com.example.assetSure.dto.LoginResponse;
 import com.example.assetSure.dto.RegisterRequest;
+import com.example.assetSure.dto.UserInfo;
+import com.example.assetSure.model.User;
 import com.example.assetSure.service.AuthService;
+import com.example.assetSure.service.UserService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,18 +26,32 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
+    @Autowired
+    private UserService userService;
+
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpSession session) {
         logger.info("Login request received: {}", loginRequest);
         try {
-            LoginResponse response = authService.login(loginRequest);
+            LoginResponse loginResponse = authService.login(loginRequest);
+
+            UserInfo userInfo = userService.getUserInfoByUsername(loginRequest.getUsername());
+            if (userInfo == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
+            }
+
+            session.setAttribute("USER_INFO", userInfo);
+
             logger.info("Login successful for: {}", loginRequest.getUsername());
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(loginResponse);
         } catch (Exception e) {
             logger.error("Login failed for: {} - {}", loginRequest.getUsername(), e.getMessage());
             return ResponseEntity.status(401).body(e.getMessage());
         }
     }
+
+
+
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest) {

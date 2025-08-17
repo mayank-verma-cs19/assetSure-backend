@@ -1,4 +1,4 @@
-package com.example.assetSure.config;  // adjust package to your project structure
+package com.example.assetSure.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,21 +26,16 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // ✅ Allow your deployed S3 frontend origin
-        configuration.setAllowedOrigins(List.of("http://assetsure-frontend-prod.s3-website.ap-south-1.amazonaws.com"));
+        configuration.setAllowedOrigins(List.of(
+                "http://localhost:3000",
+                "http://assetsure-frontend-prod.s3-website.ap-south-1.amazonaws.com"
+        ));
 
-        // ✅ Allow all standard HTTP methods
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-
-        // ✅ Allow all headers
-        configuration.setAllowedHeaders(List.of("*"));
-
-        // ✅ Allow credentials (cookies, Authorization headers)
+        configuration.addAllowedHeader("*");    // or .setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-
-        // ✅ Apply CORS for all endpoints
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
