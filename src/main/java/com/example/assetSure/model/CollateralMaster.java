@@ -1,9 +1,14 @@
 package com.example.assetSure.model;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Getter
 @Setter
@@ -22,16 +27,19 @@ public class CollateralMaster {
     private Double purity;
 
     @Column(name = "est_weight")
-    private Double estimatedWeight;
+    private Double estWeight;
+
+    @Column(name = "notes")
+    private String notes;
 
     @Column(name = "is_active")
     private Boolean isActive = true;
 
     @Column(name = "created_on", updatable = false)
-    private LocalDateTime createdOn;
+    private String createdOn;
 
     @Column(name = "updated_on")
-    private LocalDateTime updatedOn;
+    private String updatedOn;
 
     @Column(name = "is_deleted")
     private Boolean isDeleted = false;
@@ -42,17 +50,23 @@ public class CollateralMaster {
     @Column(name = "updated_by")
     private String updatedBy;
 
+    @Column(name = "created_by_id")
+    private Long createdById;
 
+    // Automatically set values before insert
     @PrePersist
     public void onCreate() {
-        createdOn = LocalDateTime.now();
         if (isActive == null) isActive = true;
         if (isDeleted == null) isDeleted = false;
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        createdOn = ZonedDateTime.now(ZoneId.of("Asia/Kolkata")).format(formatter);
     }
 
+    // Automatically update timestamp on update
     @PreUpdate
     public void onUpdate() {
-        updatedOn = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        updatedOn = ZonedDateTime.now(ZoneId.of("Asia/Kolkata")).format(formatter);
     }
 }
-

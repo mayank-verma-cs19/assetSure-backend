@@ -55,6 +55,8 @@ public class LedgerController {
 
         collateralMaster.setCreatedBy(userInfo.getName());
         // collateralMaster.setUserType(userInfo.getRole()); // Uncomment if needed
+        collateralMaster.setCreatedById(userInfo.getId());
+
 
         CollateralMaster savedItem = collateralService.saveCollateral(collateralMaster);
         return ResponseEntity.ok(savedItem);
@@ -69,6 +71,42 @@ public class LedgerController {
         List<CollateralMaster> items = collateralService.getAllCollateralItems();
         return ResponseEntity.ok(items);
     }
+
+    @PutMapping("/updateCollateralItem/{id}")
+    public ResponseEntity<CollateralMaster> updateCollateralItem(
+            @PathVariable Long id,
+            @RequestBody CollateralMaster updatedItem,
+            HttpSession session
+    ) {
+        UserInfo userInfo = (UserInfo) session.getAttribute("USER_INFO");
+        if (userInfo == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        CollateralMaster savedItem = collateralService.updateCollateralItem(id, updatedItem, userInfo);
+        if (savedItem == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(savedItem);
+    }
+
+    @DeleteMapping("/deleteCollateralItem/{id}")
+    public ResponseEntity<?> deleteCollateralItem(@PathVariable Long id, HttpSession session) {
+        UserInfo userInfo = (UserInfo) session.getAttribute("USER_INFO");
+        if (userInfo == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        boolean deleted = collateralService.deleteCollateralItem(id);
+        if (!deleted) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("Cannot delete collateral item: It is referenced in collateral deposits or does not exist.");
+        }
+        return ResponseEntity.noContent().build();
+    }
+
+
+
 
 
 }

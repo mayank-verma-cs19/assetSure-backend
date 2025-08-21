@@ -81,5 +81,86 @@ CREATE TABLE master_settings (
     FOREIGN KEY (updated_by) REFERENCES users(id)
 );
 
+
+
+CREATE TABLE ledger_main_table (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    father_name VARCHAR(255),
+    address TEXT,
+    phone VARCHAR(50),
+    amount DOUBLE,
+    estimate_days INT,
+    roi DOUBLE,
+    date DATE,
+    description TEXT,
+    status VARCHAR(32) DEFAULT 'ACTIVE',
+    repayment_amount DOUBLE DEFAULT 0,
+    interest_charged DOUBLE DEFAULT 0,
+    closed_on TIMESTAMP NULL,
+    closed_by_name VARCHAR(255) NULL,
+    closed_by_contact VARCHAR(50) NULL,
+    final_comments TEXT,
+    created_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_on TIMESTAMP NULL,
+    is_deleted BOOLEAN DEFAULT FALSE NOT NULL,
+    created_by VARCHAR(255),
+    updated_by VARCHAR(255)
+);
+
+CREATE TABLE ledger_transactions (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    ledger_id BIGINT NOT NULL,
+    transaction_type VARCHAR(50) NOT NULL,   -- e.g., 'REPAYMENT', 'INTEREST_CHARGE'
+    amount DOUBLE NOT NULL,
+    interest DOUBLE DEFAULT 0,
+    transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    comments TEXT,
+    created_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_on TIMESTAMP NULL,
+    is_deleted BOOLEAN DEFAULT FALSE NOT NULL,
+    created_by VARCHAR(255),
+    updated_by VARCHAR(255),
+    CONSTRAINT fk_ledger_transaction FOREIGN KEY (ledger_id) REFERENCES ledger_main_table(id) ON DELETE CASCADE
+);
+
+CREATE TABLE collateral_deposite (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    ledger_id BIGINT NOT NULL,
+    collateral_master_id BIGINT NOT NULL,
+    weight DOUBLE,
+    notes TEXT,
+    is_returned BOOLEAN DEFAULT FALSE NOT NULL,
+    created_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_on TIMESTAMP NULL,
+    is_deleted BOOLEAN DEFAULT FALSE NOT NULL,
+    created_by VARCHAR(255),
+    updated_by VARCHAR(255),
+    CONSTRAINT fk_ledger FOREIGN KEY (ledger_id) REFERENCES ledger_main_table(id) ON DELETE CASCADE,
+    CONSTRAINT fk_collateral_master FOREIGN KEY (collateral_master_id) REFERENCES collateral_master(id) ON DELETE RESTRICT
+);
+
+CREATE TABLE collateral_master (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    material VARCHAR(255),
+    purity DOUBLE,
+    est_weight DOUBLE,
+    is_active BOOLEAN DEFAULT TRUE NOT NULL,
+    created_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_on TIMESTAMP NULL,
+    is_deleted BOOLEAN DEFAULT FALSE NOT NULL,
+    created_by VARCHAR(255),
+    updated_by VARCHAR(255)
+);
+
+ALTER TABLE collateral_master
+ADD COLUMN notes VARCHAR(255),
+ADD COLUMN created_by_id INT;
+
+ALTER TABLE collateral_master
+MODIFY created_on TIMESTAMP,
+MODIFY updated_on TIMESTAMP;
+
     * */
 }
