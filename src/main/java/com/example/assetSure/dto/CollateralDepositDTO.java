@@ -3,12 +3,12 @@ package com.example.assetSure.dto;
 public class CollateralDepositDTO {
 
     private Long id;
-    private Long collateralMasterId;  // Use this consistently as field and getter/setter
+    private Long collateralMasterId;
     private Double weight;
     private String notes;
     private Boolean isReturned;
 
-    // getters and setters
+    // Getters and setters
 
     public Long getId() {
         return id;
@@ -18,7 +18,7 @@ public class CollateralDepositDTO {
         this.id = id;
     }
 
-    public Long getCollateralMasterId() {  // Correct getter name
+    public Long getCollateralMasterId() {
         return collateralMasterId;
     }
 
@@ -42,7 +42,7 @@ public class CollateralDepositDTO {
         this.notes = notes;
     }
 
-    public Boolean getIsReturned() {  // Correct getter name for Boolean field
+    public Boolean getIsReturned() {
         return isReturned;
     }
 

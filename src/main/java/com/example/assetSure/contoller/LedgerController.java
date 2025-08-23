@@ -1,12 +1,14 @@
 package com.example.assetSure.contoller;
 
+import com.example.assetSure.dto.LedgerDTO;
 import com.example.assetSure.dto.UserInfo;
+import com.example.assetSure.mapper.LedgerMapper;
 import com.example.assetSure.model.CollateralMaster;
 import com.example.assetSure.model.LedgerMain;
-import com.example.assetSure.model.User;
 import com.example.assetSure.repository.CollateralMasterRepository;
 import com.example.assetSure.service.CollateralService;
-import com.example.assetSure.service.LedgerService;
+import com.example.assetSure.service.LedgerMainService;
+import com.example.assetSure.service.serviceImpl.LedgerServiceImpl;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,23 +21,24 @@ import java.util.List;
 @RequestMapping("/api")
 public class LedgerController {
 
-    private final LedgerService ledgerService;
+    @Autowired
+    public LedgerMapper ledgerMapper;
 
     @Autowired
-    public LedgerController(LedgerService ledgerService) {
-        this.ledgerService = ledgerService;
-    }
+    private LedgerMainService ledgerMainService;
 
     @PostMapping("/addTransactions")
-    public ResponseEntity<LedgerMain> addTransaction(@RequestBody LedgerMain ledgerMain) {
-        // Set bidirectional relationships
-        if (ledgerMain.getCollaterals() != null) {
-            ledgerMain.getCollaterals().forEach(collateral -> collateral.setLedgerMain(ledgerMain));
+    public ResponseEntity<LedgerMain> addTransaction(@RequestBody LedgerDTO ledgerDTO,HttpSession session) {
+        UserInfo userInfo = (UserInfo) session.getAttribute("USER_INFO");
+        if (userInfo == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-
-        LedgerMain savedEntry = ledgerService.save(ledgerMain);
-        return ResponseEntity.ok(savedEntry);
+        LedgerMain ledgerMain = ledgerMapper.toEntity(ledgerDTO);
+        LedgerMain savedLedgerMain = ledgerMainService.save(ledgerMain,userInfo);
+        return ResponseEntity.ok(savedLedgerMain);
     }
+
+
 
     @Autowired
     private CollateralMasterRepository collateralMasterRepository;
@@ -104,9 +107,5 @@ public class LedgerController {
         }
         return ResponseEntity.noContent().build();
     }
-
-
-
-
 
 }

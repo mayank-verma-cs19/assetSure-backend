@@ -1,4 +1,4 @@
-package com.example.assetSure.service;
+package com.example.assetSure.service.serviceImpl;
 
 import com.example.assetSure.dto.LoginRequest;
 import com.example.assetSure.dto.LoginResponse;
@@ -12,8 +12,6 @@ import org.springframework.stereotype.Service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Optional;
 
 @Service
 public class AuthService {

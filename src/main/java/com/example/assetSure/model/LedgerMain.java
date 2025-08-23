@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "collateral_deposite")
+@Table(name = "ledger_main_table")
 @Getter
 @Setter
 public class LedgerMain {
@@ -41,7 +41,7 @@ public class LedgerMain {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    private String status;    // e.g. ACTIVE, CLOSED, PARTIAL
+    private String status;
 
     @Column(name = "repayment_amount")
     private Double repaymentAmount;
@@ -76,10 +76,8 @@ public class LedgerMain {
     @Column(name = "updated_by")
     private String updatedBy;
 
-    @OneToMany(mappedBy = "ledgerMain", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "ledger", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CollateralDeposit> collaterals = new ArrayList<>();
-
-    // Getters and Setters ...
 
     @PrePersist
     public void onCreate() {

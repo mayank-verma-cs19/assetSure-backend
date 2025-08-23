@@ -1,9 +1,10 @@
-package com.example.assetSure.service;
+package com.example.assetSure.service.serviceImpl;
 
 import com.example.assetSure.dto.UserInfo;
 import com.example.assetSure.model.CollateralMaster;
 import com.example.assetSure.repository.CollateralDepositRepository;
 import com.example.assetSure.repository.CollateralMasterRepository;
+import com.example.assetSure.service.CollateralService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -39,10 +40,6 @@ public class CollateralServiceImpl implements CollateralService {
 
             CollateralMaster existing = existingOpt.get();
 
-    //        existing.setName(updatedItem.getName());
-    //        existing.setMaterial(updatedItem.getMaterial());
-    //        existing.setPurity(updatedItem.getPurity());
-    //        existing.setEstWeight(updatedItem.getEstWeight());
             existing.setNotes(updatedItem.getNotes());
             existing.setIsActive(updatedItem.getIsActive());
             existing.setUpdatedBy(userInfo.getName());
@@ -57,7 +54,6 @@ public class CollateralServiceImpl implements CollateralService {
 
     @Override
     public boolean deleteCollateralItem(Long id) {
-        // Check if this collateral is referenced in CollateralDeposit
         boolean isMapped = collateralDepositRepository.existsByCollateralMasterId(id);
         if (isMapped) {
             // Cannot delete: mapped somewhere else

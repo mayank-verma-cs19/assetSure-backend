@@ -1,5 +1,6 @@
 package com.example.assetSure.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,11 +18,12 @@ public class CollateralDeposit {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ledger_id", nullable = false)
-    private LedgerMain ledgerMain;
+    @JoinColumn(name = "ledger_id")
+    @JsonIgnore
+    private LedgerMain ledger;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "collateral_master_id", nullable = false)
+    @JoinColumn(name = "collateral_master_id")
     private CollateralMaster collateralMaster;
 
     private Double weight;
@@ -46,7 +48,6 @@ public class CollateralDeposit {
 
     @Column(name = "updated_by")
     private String updatedBy;
-
 
     @PrePersist
     public void onCreate() {

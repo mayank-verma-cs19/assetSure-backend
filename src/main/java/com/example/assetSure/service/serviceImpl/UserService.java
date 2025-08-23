@@ -1,4 +1,4 @@
-package com.example.assetSure.service;
+package com.example.assetSure.service.serviceImpl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
