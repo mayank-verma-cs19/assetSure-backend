@@ -76,6 +76,11 @@ public class LedgerMain {
     @Column(name = "updated_by")
     private String updatedBy;
 
+    @ManyToOne
+    @JoinColumn(name = "lender_id")
+    private Lender lender;
+
+
     @OneToMany(mappedBy = "ledger", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CollateralDeposit> collaterals = new ArrayList<>();
 
