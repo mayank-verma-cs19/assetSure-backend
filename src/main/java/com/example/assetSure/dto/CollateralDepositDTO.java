@@ -49,4 +49,14 @@ public class CollateralDepositDTO {
     public void setIsReturned(Boolean isReturned) {
         this.isReturned = isReturned;
     }
+
+    private String collateralMasterName;
+
+    public String getCollateralMasterName() {
+        return collateralMasterName;
+    }
+    public void setCollateralMasterName(String collateralMasterName) {
+        this.collateralMasterName = collateralMasterName;
+    }
+
 }

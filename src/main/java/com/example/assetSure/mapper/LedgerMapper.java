@@ -97,6 +97,7 @@ public class LedgerMapper {
 
         if (entity.getCollateralMaster() != null) {
             dto.setCollateralMasterId(entity.getCollateralMaster().getId());
+            dto.setCollateralMasterName(entity.getCollateralMaster().getName());
         }
 
         dto.setWeight(entity.getWeight());

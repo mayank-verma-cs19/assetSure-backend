@@ -38,6 +38,17 @@ public class LedgerController {
         return ResponseEntity.ok(savedLedgerMain);
     }
 
+    @GetMapping("/getLedgers")
+    public ResponseEntity<List<LedgerDTO>> getLedgers(HttpSession session) {
+        UserInfo userInfo = (UserInfo) session.getAttribute("USER_INFO");
+        if (userInfo == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        List<LedgerDTO> ledgerList = ledgerMainService.getAllLedgers(userInfo);
+        return ResponseEntity.ok(ledgerList);
+    }
+
+
 
 
     @Autowired
