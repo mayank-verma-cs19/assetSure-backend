@@ -5,6 +5,7 @@ import com.example.assetSure.dto.LedgerDTO;
 import com.example.assetSure.model.CollateralDeposit;
 import com.example.assetSure.model.CollateralMaster;
 import com.example.assetSure.model.LedgerMain;
+import com.example.assetSure.model.Lender;
 import com.example.assetSure.repository.CollateralMasterRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -40,6 +41,10 @@ public class LedgerMapper {
         dto.setClosedByContact(entity.getClosedByContact());
         dto.setFinalComments(entity.getFinalComments());
 
+        if (entity.getLender() != null) {
+            dto.setLendedBy(entity.getLender().getId()); // only ID
+        }
+
         if (entity.getCollaterals() != null) {
             List<CollateralDepositDTO> collDto = entity.getCollaterals().stream()
                     .map(this::toDto)
@@ -71,6 +76,14 @@ public class LedgerMapper {
         entity.setClosedByName(dto.getClosedByName());
         entity.setClosedByContact(dto.getClosedByContact());
         entity.setFinalComments(dto.getFinalComments());
+
+
+        if (dto.getLendedBy() != null) {
+            Lender lender = new Lender();
+            lender.setId(dto.getLendedBy()); // create ref with ID only
+            entity.setLender(lender);
+        }
+
 
         if (dto.getCollaterals() != null) {
             List<CollateralDeposit> collEntities = dto.getCollaterals().stream()

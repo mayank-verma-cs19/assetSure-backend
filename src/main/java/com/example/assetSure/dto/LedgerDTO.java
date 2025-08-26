@@ -1,5 +1,7 @@
 package com.example.assetSure.dto;
 
+import com.example.assetSure.model.Lender;
+
 import java.time.LocalDate;
 import java.util.List;
 
@@ -22,6 +24,15 @@ public class LedgerDTO {
     private String closedByName;
     private String closedByContact;
     private String finalComments;
+    private Long lendedBy;
+
+    public Long getLendedBy() {
+        return lendedBy;
+    }
+
+    public void setLendedBy(Long lendedBy) {
+        this.lendedBy = lendedBy;
+    }
 
     private List<CollateralDepositDTO> collaterals;
 

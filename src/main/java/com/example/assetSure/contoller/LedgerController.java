@@ -49,8 +49,6 @@ public class LedgerController {
     }
 
 
-
-
     @Autowired
     private CollateralMasterRepository collateralMasterRepository;
 

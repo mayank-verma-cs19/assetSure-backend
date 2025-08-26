@@ -162,5 +162,51 @@ ALTER TABLE collateral_master
 MODIFY created_on TIMESTAMP,
 MODIFY updated_on TIMESTAMP;
 
+- 1. Drop the wrong foreign key (replace FK1vjgyw2qt7nm2m8wm07bh8dk with your actual constraint name if different)
+ALTER TABLE `collateral_deposite`
+DROP FOREIGN KEY `FK1vjgyw2qt7nm2m8wm07bh8dk`;
+
+-- 2. Make sure collateral_master_id has the correct foreign key
+ALTER TABLE `collateral_deposite`
+DROP FOREIGN KEY `FKg1wresqpta1b1pj3umjgihix9`;
+
+ALTER TABLE `collateral_deposite`
+ADD CONSTRAINT `FK_collateral_master`
+FOREIGN KEY (`collateral_master_id`) REFERENCES `collateral_master` (`id`);
+
+-- 3. Add correct foreign key for ledger_id
+ALTER TABLE `collateral_deposite`
+ADD CONSTRAINT `FK_ledger_main`
+FOREIGN KEY (`ledger_id`) REFERENCES `ledger_main_table` (`id`);
+
+CREATE TABLE `lender` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `created_by` varchar(255) DEFAULT NULL,
+  `created_on` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_by` varchar(255) DEFAULT NULL,
+  `updated_on` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+);
+
+CREATE TABLE settings (
+    id BIGINT PRIMARY KEY,   -- singleton row with id=1
+    roi DOUBLE,
+    estimate_days INT,
+    default_borrower_id BIGINT,
+    created_by VARCHAR(100),
+    created_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_by VARCHAR(100),
+    updated_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_default_lender FOREIGN KEY (default_lender_id) REFERENCES lender(id)
+);
+
+ALTER TABLE ledger_main_table
+DROP FOREIGN KEY FK4xivbdsw35krqgixcymbm57fb;
+
+ALTER TABLE ledger_main_table
+ADD CONSTRAINT fk_lender FOREIGN KEY (lender_id) REFERENCES lender(id);
+
+
     * */
 }

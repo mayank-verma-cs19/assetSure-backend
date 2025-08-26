@@ -9,6 +9,7 @@ import com.example.assetSure.model.CollateralDeposit;
 import com.example.assetSure.model.LedgerMain;
 import com.example.assetSure.repository.LedgerMainRepository;
 import com.example.assetSure.service.LedgerMainService;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,7 +49,9 @@ public class LedgerServiceImpl implements LedgerMainService {
 
     @Override
     public List<LedgerDTO> getAllLedgers(UserInfo userInfo) {
-        List<LedgerMain> ledgers = ledgerMainRepository.findAll();
+        List<LedgerMain> ledgers = ledgerMainRepository.findAll(
+                Sort.by(Sort.Direction.DESC, "createdOn") // or "createdOn"
+        );
 
         return ledgers.stream().map(ledger -> {
             LedgerDTO dto = new LedgerDTO();
@@ -69,7 +72,7 @@ public class LedgerServiceImpl implements LedgerMainService {
             dto.setClosedByContact(ledger.getClosedByContact());
             dto.setFinalComments(ledger.getFinalComments());
 
-            // Map collaterals (deposits)
+            // Map collaterals
             List<CollateralDepositDTO> depositDTOs = ledger.getCollaterals().stream().map(deposit -> {
                 CollateralDepositDTO depDTO = new CollateralDepositDTO();
                 depDTO.setId(deposit.getId());
@@ -88,6 +91,5 @@ public class LedgerServiceImpl implements LedgerMainService {
             return dto;
         }).toList();
     }
-
 
 }
