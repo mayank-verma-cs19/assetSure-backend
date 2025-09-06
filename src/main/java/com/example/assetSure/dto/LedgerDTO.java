@@ -9,6 +9,15 @@ public class LedgerDTO {
 
     private Long id;
     private String name;
+
+    public String getLenderName() {
+        return lenderName;
+    }
+
+    public void setLenderName(String lenderName) {
+        this.lenderName = lenderName;
+    }
+
     private String fatherName;
     private String address;
     private String phone;
@@ -25,6 +34,8 @@ public class LedgerDTO {
     private String closedByContact;
     private String finalComments;
     private Long lendedBy;
+    private String lenderName;
+
 
     public Long getLendedBy() {
         return lendedBy;

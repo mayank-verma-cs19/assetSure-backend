@@ -7,13 +7,17 @@ import com.example.assetSure.dto.LedgerDTO;
 import com.example.assetSure.dto.UserInfo;
 import com.example.assetSure.model.CollateralDeposit;
 import com.example.assetSure.model.LedgerMain;
+import com.example.assetSure.model.Lender;
 import com.example.assetSure.repository.LedgerMainRepository;
+import com.example.assetSure.repository.LenderRepository;
 import com.example.assetSure.service.LedgerMainService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 
 @Service
@@ -71,6 +75,11 @@ public class LedgerServiceImpl implements LedgerMainService {
             dto.setClosedByName(ledger.getClosedByName());
             dto.setClosedByContact(ledger.getClosedByContact());
             dto.setFinalComments(ledger.getFinalComments());
+            if (ledger.getLender() != null) {
+                dto.setLenderName(ledger.getLender().getName());
+            }else {
+                dto.setLenderName("");
+            }
 
             // Map collaterals
             List<CollateralDepositDTO> depositDTOs = ledger.getCollaterals().stream().map(deposit -> {

@@ -3,10 +3,11 @@ package com.example.assetSure.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "transaction_type")
+@Table(name = "ledger_transactions")
 @Getter
 @Setter
 public class LedgerTransaction {
@@ -19,12 +20,13 @@ public class LedgerTransaction {
     @JoinColumn(name = "ledger_id", nullable = false)
     private LedgerMain ledgerMain;
 
-    @Column(name = "transaction_type")
-    private String transactionType; // e.g. "REPAYMENT", "INTEREST_CHARGE"
+    @Enumerated(EnumType.STRING)
+    @Column(name = "transaction_type", nullable = false)
+    private TransactionType transactionType;
 
-    private Double amount;
+    private BigDecimal amount;
 
-    private Double interest;
+    private BigDecimal interest = BigDecimal.ZERO;
 
     @Column(name = "transaction_date")
     private LocalDateTime transactionDate;
@@ -38,7 +40,7 @@ public class LedgerTransaction {
     @Column(name = "updated_on")
     private LocalDateTime updatedOn;
 
-    @Column(name = "is_deleted")
+    @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted = false;
 
     @Column(name = "created_by")
@@ -47,7 +49,9 @@ public class LedgerTransaction {
     @Column(name = "updated_by")
     private String updatedBy;
 
-    // Getters and Setters ...
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private TransactionStatus status = TransactionStatus.ACTIVE;
 
     @PrePersist
     public void onCreate() {
@@ -59,5 +63,17 @@ public class LedgerTransaction {
     @PreUpdate
     public void onUpdate() {
         updatedOn = LocalDateTime.now();
+    }
+
+    public enum TransactionType {
+        CREDIT,
+        DEBIT
+    }
+
+    public enum TransactionStatus {
+        ACTIVE,
+        PENDING,
+        SETTLED,
+        CANCELLED
     }
 }

@@ -1,14 +1,18 @@
 package com.example.assetSure.contoller;
 
+import com.example.assetSure.dto.UserInfo;
 import com.example.assetSure.model.Lender;
 import com.example.assetSure.model.Settings;
 import com.example.assetSure.repository.LenderRepository;
 import com.example.assetSure.repository.LedgerMainRepository;
 import com.example.assetSure.repository.SettingsRepository;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,11 +42,44 @@ public class SettingController {
     }
 
     @PostMapping("/settings")
-    public ResponseEntity<Settings> saveSettings(@RequestBody Settings settings) {
-        settings.setId(1L);
-        Settings saved = settingsRepository.save(settings);
+    public ResponseEntity<Settings> saveSettings(@RequestBody Settings settings, HttpSession session) {
+        UserInfo userInfo = (UserInfo) session.getAttribute("USER_INFO");
+        if (userInfo == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        Optional<Settings> optSettings = settingsRepository.findById(1L);
+
+        Settings toSave;
+        if (optSettings.isPresent()) {
+            toSave = optSettings.get();
+
+            toSave.setRoi(settings.getRoi());
+            toSave.setEstimateDays(settings.getEstimateDays());
+            toSave.setDefaultLenderId(settings.getDefaultLenderId());
+            toSave.setEnablePopup(settings.getEnablePopup());
+
+            toSave.setUpdatedBy(userInfo.getUsername());
+            toSave.setUpdatedOn(LocalDateTime.now());
+
+        } else {
+            toSave = new Settings();
+            toSave.setId(1L);
+            toSave.setRoi(settings.getRoi());
+            toSave.setEstimateDays(settings.getEstimateDays());
+            toSave.setDefaultLenderId(settings.getDefaultLenderId());
+
+            toSave.setCreatedBy(userInfo.getUsername());
+            toSave.setCreatedOn(LocalDateTime.now());
+            toSave.setUpdatedBy(userInfo.getUsername());
+            toSave.setUpdatedOn(LocalDateTime.now());
+            toSave.setEnablePopup(settings.getEnablePopup());
+        }
+
+        Settings saved = settingsRepository.save(toSave);
         return ResponseEntity.ok(saved);
     }
+
 
     // --- LENDERS ---
 

@@ -3,7 +3,6 @@ package com.example.assetSure.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-
 import java.time.LocalDateTime;
 
 @Setter
@@ -22,6 +21,9 @@ public class Settings {
 
     @Column(name = "default_lender_id")
     private Long defaultLenderId;
+
+    @Column(name = "enable_popup")
+    private Boolean enablePopup;  // default ON
 
     @Column(name = "created_by")
     private String createdBy;
