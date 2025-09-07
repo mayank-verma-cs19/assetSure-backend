@@ -7,8 +7,10 @@ import com.example.assetSure.dto.LedgerDTO;
 import com.example.assetSure.dto.UserInfo;
 import com.example.assetSure.model.CollateralDeposit;
 import com.example.assetSure.model.LedgerMain;
+import com.example.assetSure.model.LedgerTransaction;
 import com.example.assetSure.model.Lender;
 import com.example.assetSure.repository.LedgerMainRepository;
+import com.example.assetSure.repository.LedgerTransactionRepository;
 import com.example.assetSure.repository.LenderRepository;
 import com.example.assetSure.service.LedgerMainService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +18,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -29,27 +32,46 @@ public class LedgerServiceImpl implements LedgerMainService {
         this.ledgerMainRepository = ledgerMainRepository;
     }
 
+    @Autowired
+    private LedgerTransactionRepository ledgerTransactionRepository;
+
     @Transactional
     public LedgerMain save(LedgerMain ledgerMain, UserInfo userInfo) {
-        // Set default values for LedgerMain
+        // Set defaults for LedgerMain
         if (ledgerMain.getCreatedOn() == null) ledgerMain.setCreatedOn(LocalDateTime.now());
         if (ledgerMain.getIsDeleted() == null) ledgerMain.setIsDeleted(false);
         ledgerMain.setCreatedBy(userInfo.getId().toString());
 
-        LedgerMain savedLedgerMain = ledgerMainRepository.save(ledgerMain);
-
-        if (savedLedgerMain.getCollaterals() != null) {
-            for (CollateralDeposit collateral : savedLedgerMain.getCollaterals()) {
-                collateral.setLedger(savedLedgerMain);           // foreign key
+        // Handle collaterals BEFORE saving
+        if (ledgerMain.getCollaterals() != null) {
+            for (CollateralDeposit collateral : ledgerMain.getCollaterals()) {
+                collateral.setLedger(ledgerMain); // foreign key
                 if (collateral.getCreatedOn() == null) collateral.setCreatedOn(LocalDateTime.now());
                 if (collateral.getIsDeleted() == null) collateral.setIsDeleted(false);
                 collateral.setCreatedBy(userInfo.getUsername());
             }
         }
 
-        // Save ledger again to cascade collateral deposits
-        return ledgerMainRepository.save(savedLedgerMain);
+        // Save LedgerMain (cascade will save collaterals)
+        LedgerMain savedLedgerMain = ledgerMainRepository.save(ledgerMain);
+
+        // 🔹 Create initial DEBIT transaction (loan given)
+        LedgerTransaction transaction = new LedgerTransaction();
+        transaction.setLedgerMain(savedLedgerMain);
+        transaction.setTransactionType(LedgerTransaction.TransactionType.DEBIT); // safer
+        transaction.setAmount(BigDecimal.valueOf(Double.parseDouble(savedLedgerMain.getAmount().toString())));
+        transaction.setTransactionDate(LocalDateTime.now());
+        transaction.setComments("Initial loan entry from LedgerMain");
+        transaction.setCreatedBy(userInfo.getUsername());
+        transaction.setCreatedOn(LocalDateTime.now());
+        transaction.setIsDeleted(false);
+
+        ledgerTransactionRepository.save(transaction);
+
+        return savedLedgerMain; // ✅ no need to save again
     }
+
+
 
     @Override
     public List<LedgerDTO> getAllLedgers(UserInfo userInfo) {
