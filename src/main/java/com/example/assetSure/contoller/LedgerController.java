@@ -6,6 +6,7 @@ import com.example.assetSure.mapper.LedgerMapper;
 import com.example.assetSure.model.CollateralMaster;
 import com.example.assetSure.model.LedgerMain;
 import com.example.assetSure.repository.CollateralMasterRepository;
+import com.example.assetSure.repository.LedgerMainRepository;
 import com.example.assetSure.service.CollateralService;
 import com.example.assetSure.service.LedgerMainService;
 import com.example.assetSure.service.serviceImpl.LedgerServiceImpl;
@@ -16,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
@@ -27,7 +29,7 @@ public class LedgerController {
     @Autowired
     private LedgerMainService ledgerMainService;
 
-    @PostMapping("/addTransactions")
+    @PostMapping("/ledger")
     public ResponseEntity<LedgerMain> addTransaction(@RequestBody LedgerDTO ledgerDTO,HttpSession session) {
         UserInfo userInfo = (UserInfo) session.getAttribute("USER_INFO");
         if (userInfo == null) {
@@ -115,6 +117,28 @@ public class LedgerController {
                     .body("Cannot delete collateral item: It is referenced in collateral deposits or does not exist.");
         }
         return ResponseEntity.noContent().build();
+    }
+
+    @Autowired
+    private LedgerMainRepository ledgerMainRepository;
+
+    @PutMapping("/ledger/{id}")
+    public ResponseEntity<LedgerMain> updateLedger(@PathVariable Long id, @RequestBody LedgerDTO ledgerDTO, HttpSession session) {
+        UserInfo userInfo = (UserInfo) session.getAttribute("USER_INFO");
+        if (userInfo == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        Optional<LedgerMain> existing = ledgerMainRepository.findById(id);
+        if (!existing.isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        LedgerMain ledgerToUpdate = ledgerMapper.toEntity(ledgerDTO);
+        ledgerToUpdate.setId(id);
+
+        LedgerMain updated = ledgerMainService.save(ledgerToUpdate, userInfo);
+        return ResponseEntity.ok(updated);
     }
 
 }

@@ -13,6 +13,7 @@ import com.example.assetSure.repository.LedgerMainRepository;
 import com.example.assetSure.repository.LedgerTransactionRepository;
 import com.example.assetSure.repository.LenderRepository;
 import com.example.assetSure.service.LedgerMainService;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
+import java.util.NoSuchElementException;
+
 
 @Service
 public class LedgerServiceImpl implements LedgerMainService {
@@ -37,38 +40,74 @@ public class LedgerServiceImpl implements LedgerMainService {
 
     @Transactional
     public LedgerMain save(LedgerMain ledgerMain, UserInfo userInfo) {
-        // Set defaults for LedgerMain
-        if (ledgerMain.getCreatedOn() == null) ledgerMain.setCreatedOn(LocalDateTime.now());
-        if (ledgerMain.getIsDeleted() == null) ledgerMain.setIsDeleted(false);
-        ledgerMain.setCreatedBy(userInfo.getId().toString());
+        if (ledgerMain.getId() != null) {
+            // Existing ledger - Update flow
+            LedgerMain existing = ledgerMainRepository.findById(ledgerMain.getId())
+                    .orElseThrow(() -> new EntityNotFoundException("Ledger not found with id " + ledgerMain.getId()));
 
-        // Handle collaterals BEFORE saving
-        if (ledgerMain.getCollaterals() != null) {
-            for (CollateralDeposit collateral : ledgerMain.getCollaterals()) {
-                collateral.setLedger(ledgerMain); // foreign key
-                if (collateral.getCreatedOn() == null) collateral.setCreatedOn(LocalDateTime.now());
-                if (collateral.getIsDeleted() == null) collateral.setIsDeleted(false);
-                collateral.setCreatedBy(userInfo.getUsername());
+            // Update fields - selectively or all needed
+            existing.setName(ledgerMain.getName());
+            existing.setFatherName(ledgerMain.getFatherName());
+            existing.setPhone(ledgerMain.getPhone());
+            existing.setAmount(ledgerMain.getAmount());
+            existing.setEstimateDays(ledgerMain.getEstimateDays());
+            existing.setRoi(ledgerMain.getRoi());
+            existing.setDate(ledgerMain.getDate());
+            existing.setDescription(ledgerMain.getDescription());
+            existing.setLender(ledgerMain.getLender());
+            existing.setAddress(ledgerMain.getAddress());
+
+            // Handle collaterals - remove old, add new or update associations accordingly
+            existing.getCollaterals().clear();
+
+            if (ledgerMain.getCollaterals() != null) {
+                for (CollateralDeposit collateral : ledgerMain.getCollaterals()) {
+                    collateral.setLedger(existing); // set parent ref
+                    if (collateral.getCreatedOn() == null) collateral.setCreatedOn(LocalDateTime.now());
+                    if (collateral.getIsDeleted() == null) collateral.setIsDeleted(false);
+                    collateral.setCreatedBy(userInfo.getUsername());
+                    existing.getCollaterals().add(collateral);
+                }
             }
+
+            // Update audit fields
+            existing.setUpdatedBy(userInfo.getUsername());
+            existing.setUpdatedOn(LocalDateTime.now());
+
+            // Save updated entity (cascade persists collaterals)
+            return ledgerMainRepository.save(existing);
+
+        } else {
+            // New ledger - Insert flow (existing logic unchanged)
+            if (ledgerMain.getCreatedOn() == null) ledgerMain.setCreatedOn(LocalDateTime.now());
+            if (ledgerMain.getIsDeleted() == null) ledgerMain.setIsDeleted(false);
+            ledgerMain.setCreatedBy(userInfo.getId().toString());
+
+            if (ledgerMain.getCollaterals() != null) {
+                for (CollateralDeposit collateral : ledgerMain.getCollaterals()) {
+                    collateral.setLedger(ledgerMain);
+                    if (collateral.getCreatedOn() == null) collateral.setCreatedOn(LocalDateTime.now());
+                    if (collateral.getIsDeleted() == null) collateral.setIsDeleted(false);
+                    collateral.setCreatedBy(userInfo.getUsername());
+                }
+            }
+
+            LedgerMain savedLedgerMain = ledgerMainRepository.save(ledgerMain);
+
+            LedgerTransaction transaction = new LedgerTransaction();
+            transaction.setLedgerMain(savedLedgerMain);
+            transaction.setTransactionType(LedgerTransaction.TransactionType.DEBIT);
+            transaction.setAmount(BigDecimal.valueOf(Double.parseDouble(savedLedgerMain.getAmount().toString())));
+            transaction.setTransactionDate(LocalDateTime.now());
+            transaction.setComments("Initial loan entry from LedgerMain");
+            transaction.setCreatedBy(userInfo.getUsername());
+            transaction.setCreatedOn(LocalDateTime.now());
+            transaction.setIsDeleted(false);
+
+            ledgerTransactionRepository.save(transaction);
+
+            return savedLedgerMain;
         }
-
-        // Save LedgerMain (cascade will save collaterals)
-        LedgerMain savedLedgerMain = ledgerMainRepository.save(ledgerMain);
-
-        // 🔹 Create initial DEBIT transaction (loan given)
-        LedgerTransaction transaction = new LedgerTransaction();
-        transaction.setLedgerMain(savedLedgerMain);
-        transaction.setTransactionType(LedgerTransaction.TransactionType.DEBIT); // safer
-        transaction.setAmount(BigDecimal.valueOf(Double.parseDouble(savedLedgerMain.getAmount().toString())));
-        transaction.setTransactionDate(LocalDateTime.now());
-        transaction.setComments("Initial loan entry from LedgerMain");
-        transaction.setCreatedBy(userInfo.getUsername());
-        transaction.setCreatedOn(LocalDateTime.now());
-        transaction.setIsDeleted(false);
-
-        ledgerTransactionRepository.save(transaction);
-
-        return savedLedgerMain; // ✅ no need to save again
     }
 
 
